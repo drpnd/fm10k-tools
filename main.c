@@ -256,7 +256,8 @@ main(int argc, const char *const argv[])
     init_switch_manager(&fm10k);
 
     /* Testing */
-    printf("%x\n", *((uint32_t *)(ptr + 0x10)));
+    printf("%x %x\n", *((uint32_t *)(ptr + 0x10)),
+           rd32(fm10k.mmio, FM10K_SOFT_RESET));
 
     /* Unmap and close */
     (void)munmap(ptr, size);
