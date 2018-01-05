@@ -332,7 +332,7 @@
  * 5    TxLaneflipEn
  * 31:6 Reserved
  */
-#define FM10K_PCIE_CTRL         FM10K_PF(0x0)
+#define FM10K_PCIE_CTRL         FM10K_PCIE_PF(0x0)
 
 /*
  * PCIE_CTRL_EXT
@@ -341,7 +341,7 @@
  * 2    SwitchLoopback
  * 31:3 Reserved
  */
-#define FM10K_PCIE_CTRL_EXT     FM10K_PF(0x1)
+#define FM10K_PCIE_CTRL_EXT     FM10K_PCIE_PF(0x1)
 
 /*
  * EPL_CFG_A[0..8]
