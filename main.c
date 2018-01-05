@@ -139,8 +139,10 @@ init_scheduler(fm10k_t *fm10k)
 
     /* Initialization of scheduler polling schedule */
     /* Logical ports 0..35: Ethernet */
-    for ( i = 0; i < 36; i++ ) {
-        m32 = i | (i << 8);
+    for ( i = 0; i < 2; i++ ) {
+        /* Set Quad to 1 */
+        /* PhysPort | Port | Quad */
+        m32 = (i * 4) | (i << 8) | (1 << 14);
         wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i), m32);
         wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i), m32);
     }
@@ -150,6 +152,7 @@ init_scheduler(fm10k_t *fm10k)
     int quad[8] = { 1, 1, 1, 1, 1, 1, 0, 0 };
     for ( i = 0; i < 8; i++ ) {
         m32 = physical_port[i] | (logical_port[i] << 8) | (quad[i] << 14);
+        m32 = 0;
         wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i + 36), m32);
         wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i + 36), m32);
     }
@@ -158,6 +161,60 @@ init_scheduler(fm10k_t *fm10k)
     wr32(fm10k->mmio, FM10K_SCHED_SCHEDULE_CTRL, m32);
 
     return 0;
+}
+
+/*
+ * Initialize switch manager control
+ */
+int
+init_switch_manager(fm10k_t *fm10k)
+{
+    uint32_t m32;
+    uint64_t m64;
+    int i;
+
+    /* De-assert SWITCH_RESET */
+    m32 = rd32(fm10k->mmio, FM10K_SOFT_RESET);
+    m32 &= ~(1UL << 2);
+    wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
+
+    /* Disable switch scan */
+    m32 = (1UL << 27) | (1UL << 30);
+    wr32(fm10k->mmio, FM10K_SCAN_DATA_IN, m32);
+
+    /* Disable switch loopbacks */
+    m32 = rd32(fm10k->mmio, FM10K_PCIE_CTRL_EXT);
+    m32 &= ~(1UL << 2);
+    wr32(fm10k->mmio, FM10K_PCIE_CTRL_EXT, m32);
+    /* Set EPL_CFG_A.Active = 0xf */
+    for ( i = 0; i <= 8; i++ ) {
+        m32 = rd32(fm10k->mmio, FM10K_EPL_CFG_A(i));
+        m32 |= (0xf << 7);
+        wr32(fm10k->mmio, FM10K_EPL_CFG_A(i), m32);
+    }
+    /* Set TE_CFG.SwitchLoopbackDisable = 1 */
+    for ( i = 0; i < 2; i++ ) {
+        m64 = rd64(fm10k->mmio, FM10K_TE_CFG(i));
+        m64 |= (1 << 25);
+        wr64(fm10k->mmio, FM10K_TE_CFG(i), m64);
+    }
+
+    /* Initialize the switch functions */
+
+    /* Initialize scheduler */
+    init_scheduler(fm10k);
+
+    /* Start LED cntroller */
+    m32 = rd32(fm10k->mmio, FM10K_LED_CFG);
+    m32 |= (1 << 24);
+    wr32(fm10k->mmio, FM10K_LED_CFG, m32);
+
+    /* Initialize IEEE 1588 system time */
+
+    /* Assert SWITCH_READY */
+    m32 = rd32(fm10k->mmio, FM10K_SOFT_RESET);
+    m32 |= (1UL << 3);
+    wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
 }
 
 
@@ -196,7 +253,7 @@ main(int argc, const char *const argv[])
     fm10k.mmio = ptr;
 
     /* Initialize scheduler */
-    init_scheduler(&fm10k);
+    init_switch_manager(&fm10k);
 
     /* Testing */
     printf("%x\n", *((uint32_t *)(ptr + 0x10)));
