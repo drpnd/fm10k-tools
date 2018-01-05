@@ -296,6 +296,19 @@
 #define FM10K_REI_STAT          FM10K_MGMT(0xc13)
 
 /*
+ * SCAN_DATA_IN
+ * 24:0 ScanData
+ * 25   ShiftIn
+ * 26   ShiftOut
+ * 27   UpdateNodes
+ * 28   Inject
+ * 29   Drain
+ * 30   Passthru
+ * 31   Single
+ */
+#define FM10K_SCAN_DATA_IN      FM10K_MGMT(0xc2d)
+
+/*
  * PCIE_SERDES_CTRL[0..7]
  * 0     Reserved
  * 1     Interrupt
@@ -307,6 +320,198 @@
  */
 #define FM10K_PCIE_SERDES_CTRL(i)               \
     FM10K_PCIE_PF(0x2 * (i) + 0x19010)
+
+
+/*
+ * PCIE_CTRL
+ * 0    LTSSM_ENABLE
+ * 1    REQ_RETRY_EN
+ * 2    BAR4_Allowed
+ * 3    Reserved
+ * 4    RxLaneflipEn
+ * 5    TxLaneflipEn
+ * 31:6 Reserved
+ */
+#define FM10K_PCIE_CTRL         FM10K_PF(0x0)
+
+/*
+ * PCIE_CTRL_EXT
+ * 0    NS_DIS
+ * 1    RO_DIS
+ * 2    SwitchLoopback
+ * 31:3 Reserved
+ */
+#define FM10K_PCIE_CTRL_EXT     FM10K_PF(0x1)
+
+/*
+ * EPL_CFG_A[0..8]
+ * 0     SpeedUp
+ * 6:1   TimeOut
+ * 10:7  Active[0..3]
+ * 16:11 SkewTolerance
+ * 31:17 Reserved
+ */
+#define FM10K_EPL_CFG_A(i)      FM10K_EPL(0x400 * (i) + 0x304)
+
+/*
+ * TE_CFG[0..1]
+ * Atomicity: 64
+ * 7:0   OuterTTL
+ * 15:8  OuterTOS
+ * 16    DeriveOuterTOS
+ * 18:17 NotIP
+ * 20:19 IPnotTCPnotUDP
+ * 22:21 IPisTCPorUDP
+ * 23    VerifyDecapCSUM
+ * 24    UpdateOldHeaderInPlaceCSUM
+ * 25    SwitchLoopbackDisable
+ * 31:26 Reserved
+ */
+#define FM10K_TE_CFG(i)         FM10K_TE(0x100000 * (i) + 0x55a02)
+
+/*
+ * CM_GLOBAL_WM
+ * 14:0  watermark
+ * 31:15 Reserved
+ */
+#define FM10K_CM_GLOBAL_WM      FM10K_CM_USAGE(0x852)
+
+/*
+ * CM_GLOBAL_CFG
+ * 7:0   ifgPenalty
+ * 8     forcePauseOn
+ * 9     forcePauseOff
+ * 10    WmSweeperEnable
+ * 11    PauseGenSweeperEnable
+ * 12    PauseRecSweeperEnable
+ * 18:13 NumSweeperPorts
+ * 31:19 Reserved
+ */
+#define FM10K_CM_GLOBAL_CFG     FM10K_CM_USAGE(0x853)
+
+/*
+ * MA_TCN_IM
+ * 0    PendingEvents
+ * 1    TCN_Overflow
+ * 31:2 Reserved
+ */
+#define FM10K_MA_TCN_IM         FM10K_L2LOOKUP_TCN(0x8c1)
+
+/*
+ * FH_TAIL_IM
+ * 1:0   SafSramErr
+ * 3:2   EgressPauseSramErr
+ * 5:4   RxStatsSramErr
+ * 7:6   PolicerUsageSramErr
+ * 9:8   TcnSramErr
+ * 10    TCN
+ * 31:11 Reserved
+ */
+#define FM10K_FH_TAIL_IM        FM10K_HANDLER_TAIL(0x8e)
+
+/*
+ * INTERRUPT_MASK_INT
+ * 8:0   PCIE_BSM[0..8]
+ * 17:9  PCIE[0..8]
+ * 26:18 EPL[0..8]
+ * 28:27 TUNNEL[0..1]
+ * 29    CORE
+ * 30    SOFTWARE
+ * 31    GPIO
+ * 32    I2C
+ * 33    MDIO
+ * 34    CRM
+ * 35    FH_TAIL
+ * 36    FG_HEAD
+ * 37    SBUS_EPL
+ * 38    SBUS_PCIE
+ * 39    PINS
+ * 40    FIBM
+ * 41    BSM
+ * 42    XCLK
+ * 63:43 Reserved
+ */
+#define FM10K_INTERRUPT_MASK_INT    FM10K_MGMT(0x402)
+
+/*
+ * INTERRUPT_MASK_PCIE
+ * 8:0   PCIE_BSM[0..8]
+ * 17:9  PCIE[0..8]
+ * 26:18 EPL[0..8]
+ * 28:27 TUNNEL[0..1]
+ * 29    CORE
+ * 30    SOFTWARE
+ * 31    GPIO
+ * 32    I2C
+ * 33    MDIO
+ * 34    CRM
+ * 35    FH_TAIL
+ * 36    FG_HEAD
+ * 37    SBUS_EPL
+ * 38    SBUS_PCIE
+ * 39    PINS
+ * 40    FIBM
+ * 41    BSM
+ * 42    XCLK
+ * 63:43 Reserved
+ */
+#define FM10K_INTERRUPT_MASK_PCIE   FM10K_MGMT(0x420)
+
+/*
+ * INTERRUPT_MASK_FIBM
+ * 8:0   PCIE_BSM[0..8]
+ * 17:9  PCIE[0..8]
+ * 26:18 EPL[0..8]
+ * 28:27 TUNNEL[0..1]
+ * 29    CORE
+ * 30    SOFTWARE
+ * 31    GPIO
+ * 32    I2C
+ * 33    MDIO
+ * 34    CRM
+ * 35    FH_TAIL
+ * 36    FG_HEAD
+ * 37    SBUS_EPL
+ * 38    SBUS_PCIE
+ * 39    PINS
+ * 40    FIBM
+ * 41    BSM
+ * 42    XCLK
+ * 63:43 Reserved
+ */
+#define FM10K_INTERRUPT_MASK_FIBM   FM10K_MGMT(0x440)
+
+/*
+ * INTERRUPT_MASK_BSM
+ * 8:0   PCIE_BSM[0..8]
+ * 17:9  PCIE[0..8]
+ * 26:18 EPL[0..8]
+ * 28:27 TUNNEL[0..1]
+ * 29    CORE
+ * 30    SOFTWARE
+ * 31    GPIO
+ * 32    I2C
+ * 33    MDIO
+ * 34    CRM
+ * 35    FH_TAIL
+ * 36    FG_HEAD
+ * 37    SBUS_EPL
+ * 38    SBUS_PCIE
+ * 39    PINS
+ * 40    FIBM
+ * 41    BSM
+ * 42    XCLK
+ * 63:43 Reserved
+ */
+#define FM10K_INTERRUPT_MASK_BSM    FM10K_MGMT(0x442)
+
+/*
+ * LED_CFG
+ * 23:0  LEDFreq
+ * 24    Enable
+ * 31:25 Reserved
+ */
+#define FM10K_LED_CFG       FM10K_MGMT(0xc2b)
 
 
 #ifdef __cplusplus
