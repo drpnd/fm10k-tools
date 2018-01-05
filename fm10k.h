@@ -67,6 +67,7 @@
  * 15:   SBM
  * (16..32: Reserved)
  */
+#define FM10K_BIST_CTRL         FM10K_MGMT(0xc10)
 #define FM10K_BIST_CTRL_RUN     FM10K_MGMT(0xc10)
 #define FM10K_BIST_CTRL_MODE    FM10K_MGMT(0xc10 + 1)
 
@@ -127,19 +128,19 @@
  * SCHED_TXQ_TAIL0_PERQ[0..383]
  * (Indexed by QID = PORT * 8 + TC)
  */
-#define FM10K_SCHED_TAIL0_PERQ(i)               \
+#define FM10K_SCHED_TXQ_TAIL0_PERQ(i)           \
     FM10K_SCHED(0x1 * i + 0x60600)
 
 /*
  * SCHED_TXQ_TAIL1_PERQ[0..383]
  */
-#define FM10K_SCHED_TAIL1_PERQ(i)               \
+#define FM10K_SCHED_TXQ_TAIL1_PERQ(i)           \
     FM10K_SCHED(0x1 * i + 0x60800)
 
 /*
  * SCHED_TXQ_HEAD_PERQ[0..383]
  */
-#define FM10K_SCHED_HEAD_PERQ(i)                \
+#define FM10K_SCHED_TXQ_HEAD_PERQ(i)            \
     FM10K_SCHED(0x1 * i + 0x60a00)
 
 /*
