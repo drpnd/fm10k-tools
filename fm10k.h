@@ -81,7 +81,7 @@
  * 31:17 Reserved
  */
 #define FM10K_SCHED_RX_SCHEDULE(i)              \
-    FM10K_SCHED(0x1 * i + 0x20000)
+    FM10K_SCHED(0x1 * (i) + 0x20000)
 
 /*
  * SCHED_TX_SCHEDULE[0..1023]
@@ -92,7 +92,7 @@
  * 16    Idle
  */
 #define FM10K_SCHED_TX_SCHEDULE(i)              \
-    FM10K_SCHED(0x1 * i + 0x20400)
+    FM10K_SCHED(0x1 * (i) + 0x20400)
 
 /*
  * SCHED_SCHEDULE_CTRL
@@ -117,7 +117,7 @@
  * 63:40 Reserved
  */
 #define FM10K_SCHED_RXQ_STORAGE_POINTERS(i)     \
-    FM10K_SCHED(0x2 * i + 0x60400)
+    FM10K_SCHED(0x2 * (i) + 0x60400)
 
 /*
  * SCHED_RXQ_FREELIST_INIT
@@ -129,19 +129,19 @@
  * (Indexed by QID = PORT * 8 + TC)
  */
 #define FM10K_SCHED_TXQ_TAIL0_PERQ(i)           \
-    FM10K_SCHED(0x1 * i + 0x60600)
+    FM10K_SCHED(0x1 * (i) + 0x60600)
 
 /*
  * SCHED_TXQ_TAIL1_PERQ[0..383]
  */
 #define FM10K_SCHED_TXQ_TAIL1_PERQ(i)           \
-    FM10K_SCHED(0x1 * i + 0x60800)
+    FM10K_SCHED(0x1 * (i) + 0x60800)
 
 /*
  * SCHED_TXQ_HEAD_PERQ[0..383]
  */
 #define FM10K_SCHED_TXQ_HEAD_PERQ(i)            \
-    FM10K_SCHED(0x1 * i + 0x60a00)
+    FM10K_SCHED(0x1 * (i) + 0x60a00)
 
 /*
  * SCHED_TXQ_FREELIST_INIT
@@ -152,7 +152,7 @@
  * SSCHED_RX_PERPORT[0..47]
  */
 #define FM10K_SCHED_SSCHED_RX_PERPORT(i)        \
-    FM10K_SCHED(0x1 * i + 0x20840)
+    FM10K_SCHED(0x1 * (i) + 0x20840)
 
 /*
  * SCHED_FREELIST_INIT
@@ -276,6 +276,38 @@
  * 31:5 Reserved
  */
 #define FM10K_SBUS_PCIE_CFG     FM10K_MGMT(0x2243)
+
+/*
+ * REI_CTRL
+ * 0    Reset
+ * 1    Mode
+ * 2    Run
+ * 3    AutoLoadEnable
+ * 31:4 Reserved
+ */
+#define FM10K_REI_CTRL          FM10K_MGMT(0xc12)
+
+/*
+ * REI_STAT
+ * 0    ReiDonePass
+ * 1    ReiDoneFail
+ * 31:2 Reserved
+ */
+#define FM10K_REI_STAT          FM10K_MGMT(0xc13)
+
+/*
+ * PCIE_SERDES_CTRL[0..7]
+ * 0     Reserved
+ * 1     Interrupt
+ * 2     InProgress
+ * 15:3  Reserved
+ * 31:16 InterruptCode
+ * 47:32 DataWrite
+ * 63:48 DataRead
+ */
+#define FM10K_PCIE_SERDES_CTRL(i)               \
+    FM10K_PCIE_PF(0x2 * (i) + 0x19010)
+
 
 #ifdef __cplusplus
 extern "C" {
