@@ -22,6 +22,29 @@
  */
 
 #include "fm10k.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <stdint.h>
+
+/* 64 MiB */
+#define FM10K_BAR4_SIZE 0x4000000
+
+/*
+ * Usage
+ */
+void
+usage(const char *prog)
+{
+    fprintf(stderr, "Usage: %s /dev/<uioX>\n", prog);
+    exit(EXIT_FAILURE);
+}
+
+/*
+ * Initialize FM10K
+ */
 
 /*
  * Main routine
@@ -29,6 +52,36 @@
 int
 main(int argc, const char *const argv[])
 {
+    int fd;
+    const char *prog;
+    const char *uiodev;
+    long pagesize;
+    void *ptr;
+    size_t size;
+
+    prog = argv[0];
+    if ( argc < 2 ) {
+        usage(prog);
+    }
+    uiodev = argv[1];
+
+    /* Open and memory map uio device */
+    fd = open (uiodev, O_RDWR);
+    if ( fd < 0 ) {
+        perror(uiodev);
+        return EXIT_FAILURE;
+    }
+    pagesize = sysconf(_SC_PAGESIZE);
+    size = (FM10K_BAR4_SIZE + pagesize - 1) / pagesize * pagesize;
+    ptr = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+
+    /* Testing */
+    printf("%x\n", *((uint32_t *)(ptr + 0x10)));
+
+    /* Unmap and close */
+    (void)munmap(ptr, size);
+    (void)close(fd);
+
     return 0;
 }
 
