@@ -414,196 +414,196 @@
 /*
  * AN_IM[0..8][0..3]
  */
-#define FM10K_AN_IM(i, j)       FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x1)
+#define FM10K_AN_IM(i, j)       FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x1)
 
 /*
  * LINK_IM[0..8][0..3]
  */
-#define FM10K_LINK_IM(i, j)     FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2)
+#define FM10K_LINK_IM(i, j)     FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2)
 
 /*
  * AN_IP[0..8][0..3]
  */
-#define FM10K_AN_IP(i, j)       FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x3)
+#define FM10K_AN_IP(i, j)       FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x3)
 
 /*
  * LINK_IP[0..8][0..3]
  */
-#define FM10K_LINK_IP(i, j)     FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x4)
+#define FM10K_LINK_IP(i, j)     FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x4)
 
 /*
  * MP_CFG[0..8][0..3]
  */
-#define FM10K_MP_CFG(i, j)      FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x6)
+#define FM10K_MP_CFG(i, j)      FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x6)
 
 /*
  * AN_37_PAGE_RX[0..8][0..3]
  */
 #define FM10K_AN_37_PAGE_RX(i, j)               \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x8)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x8)
 
 /*
  * AN_73_PAGE_RX[0..8][0..3]
  */
 #define FM10K_AN_73_PAGE_RX(i, j)               \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0xa)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0xa)
 
 /*
  * LINK_RULES[0..8][0..3]
  */
-#define FM10K_LINK_RULES(i, j)  FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0xc)
+#define FM10K_LINK_RULES(i, j)  FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0xc)
 
 /*
  * MAC_CFG[0..8][0..3]
  */
-#define FM10K_MAC_CFG(i, j)     FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x10)
+#define FM10K_MAC_CFG(i, j)     FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x10)
 
 /*
  * TX_SEQUENCE[0..8][0..3]
  */
-#define FM10K_TX_SEQUENCE(i, j) FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x1a)
+#define FM10K_TX_SEQUENCE(i, j) FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x1a)
 
 /*
  * RX_SEQUENCE[0..8][0..3]
  */
-#define FM10K_RX_SEQUENCE(i, j) FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x1c)
+#define FM10K_RX_SEQUENCE(i, j) FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x1c)
 
 /*
  * MAC_1588_STATUS[0..8][0..3]
  */
 #define FM10K_MAC_1588_STATUS(i, j)             \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x1e)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x1e)
 
 /*
  * WAKE_ERROR_COUNTER[0..8][0..3]
  */
 #define FM10K_WAKE_ERROR_COUNTER(i, j)          \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x20)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x20)
 
 /*
  * MAC_OVERSIZE_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_OVERSIZE_COUNTER(i, j)        \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x21)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x21)
 
 /*
  * MAC_JABBER_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_JABBER_COUNTER(i, j)          \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x22)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x22)
 
 /*
  * MAC_UNDERSIZE_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_UNDERSIZE_COUNTER(i, j)       \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x23)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x23)
 
 /*
  * MAC_RUNT_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_RUNT_COUNTER(i, j)            \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x24)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x24)
 
 /*
  * MAC_OVERRUN_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_OVERRUN_COUNTER(i, j)         \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x25)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x25)
 
 /*
  * MAC_UNDERRUN_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_UNDERRUN_COUNTER(i, j)        \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x26)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x26)
 
 /*
  * MAC_CODE_ERROR_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_CODE_ERROR_COUNTER(i, j)      \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x27)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x27)
 
 /*
  * EPL_TX_FRAME_ERROR_COUNTER[0..8][0..3]
  */
 #define FM10K_EPL_TX_FRAME_ERROR_COUNTER(i, j)  \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x28)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x28)
 
 /*
  * MAC_LINK_COUNTER[0..8][0..3]
  */
 #define FM10K_MAC_LINK_COUNTER(i, j)            \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x29)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x29)
 
 /*
  * PCS_1000BASEX_CFG[0..8][0..3]
  */
 #define FM10K_PCS_1000BASEX_CFG(i, j)           \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2a)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2a)
 
 /*
  * PCS_1000BASEX_RX_STATUS[0..8][0..3]
  */
 #define FM10K_PCS_1000BASEX_RX_STATUS(i, j)     \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2b)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2b)
 
 /*
  * PCS_1000BASEX_TX_STATUS[0..8][0..3]
  */
 #define FM10K_PCS_1000BASEX_TX_STATUS(i, j)     \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2c)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2c)
 
 /*
  * PCS_10GBASER_CFG[0..8][0..3]
  */
 #define FM10K_PCS_10GBASER_CFG(i, j)            \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2d)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2d)
 
 /*
  * PCS_10GBASER_RX_STATUS[0..8][0..3]
  */
 #define FM10K_PCS_10GBASER_RX_STATUS(i, j)      \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2e)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2e)
 
 /*
  * PCS_10GBASER_TX_STATUS[0..8][0..3]
  */
 #define FM10K_PCS_10GBASER_TX_STATUS(i, j)      \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x2f)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x2f)
 
 /*
  * AN_37_CFG[0..8][0..3]
  */
-#define FM10K_AN_37_CFG(i, j)   FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x30)
+#define FM10K_AN_37_CFG(i, j)   FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x30)
 
 /*
  * AN_37_TIMER_CFG[0..8][0..3]
  */
 #define FM10K_AN_37_TIMER_CFG(i, j)             \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x34)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x34)
 
 /*
  * AN_37_BASE_PAGE_TX[0..8][0..3]
  */
 #define FM10K_AN_37_BASE_PAGE_TX(i, j)          \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x6)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x6)
 
 /*
  * AN_37_BASE_PAGE_RX[0..8][0..3]
  */
 #define FM10K_AN_37_BASE_PAGE_RX(i, j)          \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x8)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x8)
 
 /*
  * AN_37_NEXT_PAGE_TX[0..8][0..3]
  */
 #define FM10K_AN_37_NEXT_PAGE_TX(i, j)          \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x6)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x6)
 
 /*
  * AN_37_NEXT_PAGE_RX[0..8][0..3]
  */
 #define FM10K_AN_37_NEXT_PAGE_RX(i, j)          \
-    FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x8)
+    FM10K_EPL(0x400 * (i) + 0x80 * (j) + 0x8)
 
 /*
  * TE_CFG[0..1]
