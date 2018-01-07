@@ -44,6 +44,15 @@ typedef struct _fm10k {
 } fm10k_t;
 
 /*
+ * Port mapping
+ */
+typedef struct _fm10k_portmap {
+    int logical;
+    int physical;
+    int quad;
+} fm10k_portmap_t;
+
+/*
  * Read/Write
  */
 static __inline__ uint32_t
@@ -139,27 +148,23 @@ init_scheduler(fm10k_t *fm10k)
     }
 
     /* Initialization of scheduler polling schedule */
-    /* Physical ports 0..35: Ethernet; Set Quad to 1 for 100 GbE */
-    for ( i = 0; i < 4; i++ ) {
-        m32 = 0 | ((i * 2) << 8) | (1 << 14); /* PhysPort | Port | Quad */
+    fm10k_portmap_t portmap[5] = {
+        { .logical = 0, .physical = 0x3f, .quad = 0 },
+        /* Physical ports 0..35: Ethernet; Set Quad to 1 for 100 GbE */
+        { .logical = 1, .physical = 0x04, .quad = 1 },
+        { .logical = 2, .physical = 0x18, .quad = 1 },
+        { .logical = 3, .physical = 0x24, .quad = 1 },
+        { .logical = 4, .physical = 0x28, .quad = 1 },
+    };
+    for ( i = 0; i < 5; i++ ) {
+        /* PhysPort | Port | Quad */
+        m32 = portmap[i].physical | (portmap[i].logical << 8)
+            | (portmap[i].quad << 14);
         wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i), m32);
         wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i), m32);
-        m32 = 4 | ((i * 2 + 1) << 8) | (1 << 14); /* PhysPort | Port | Quad */
-        wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i), m32);
-        wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i), m32);
-    }
-    /* Logical ports 36..41,46,47: 5xPEPs, 2xTE, 1xFIBM (bifurcation on) */
-    int logical_port[8] = { 36, 37, 38, 39, 40, 41, 46, 47 };
-    int physical_port[8] = { 36, 40, 44, 48, 52, 56, 60, 63 };
-    int quad[8] = { 1, 1, 1, 1, 1, 1, 0, 0 };
-    for ( i = 0; i < 8; i++ ) {
-        m32 = physical_port[i] | (logical_port[i] << 8) | (quad[i] << 14);
-        m32 = 0;
-        wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i + 36), m32);
-        wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i + 36), m32);
     }
     /* Start scheduler */
-    m32 = 1 | (43 << 2) | (1 << 11) | (43 << 13);
+    m32 = 1 | (5 << 2) | (1 << 11) | (5 << 13);
     wr32(fm10k->mmio, FM10K_SCHED_SCHEDULE_CTRL, m32);
 
     return 0;
@@ -256,16 +261,34 @@ main(int argc, const char *const argv[])
     fm10k.mmio = ptr;
 
     /* Initialize scheduler */
-    init_switch_manager(&fm10k);
+    printf("Initializing switch manager control\n");
+    //init_switch_manager(&fm10k);
 
     /* Testing */
-    printf("%x %x\n", *((uint32_t *)(ptr + 0x10)),
-           rd32(fm10k.mmio, FM10K_SOFT_RESET));
+    printf("SOFT_RESET: %x\n", rd32(fm10k.mmio, FM10K_SOFT_RESET));
     for ( i = 0; i < 9; i++ ) {
+        printf("PORT_STATUS[%d][%d]: %06x, ", i, 0,
+               rd32(fm10k.mmio, FM10K_PORT_STATUS(i, 0)));
         printf("LED[%d] %05x, ", i, rd32(fm10k.mmio, FM10K_EPL_LED_STATUS(i)));
         printf("CFG_A[%d] %05x, ", i, rd32(fm10k.mmio, FM10K_EPL_CFG_A(i)));
         printf("CFG_B[%d] %05x\n", i, rd32(fm10k.mmio, FM10K_EPL_CFG_B(i)));
     }
+    printf("PCIE_PORTLOGIC: %x\n", rd32(fm10k.mmio, FM10K_PCIE_PORTLOGIC));
+    printf("DEVICE_CFG: %x\n", rd32(fm10k.mmio, FM10K_DEVICE_CFG));
+
+#if 0
+    unsigned int data;
+    ssize_t nr;
+    while ( 1 ) {
+        /* Enable IRQ */
+        unsigned int irq_on = 1;
+        write(fd, &irq_on, sizeof(irq_on));
+        nr = read(fd, &data, sizeof(data));
+        if ( nr >= 0 ) {
+            printf("RD: %lu %u\n", nr, data);
+        }
+    }
+#endif
 
     /* Unmap and close */
     (void)munmap(ptr, size);
