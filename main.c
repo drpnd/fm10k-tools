@@ -92,6 +92,7 @@ init_scheduler(fm10k_t *fm10k)
     uint64_t m64;
     uint32_t m32;
     int i;
+    int j;
 
     /* Clear BIST-accessible switch memories */
     mode0 = rd32(fm10k->mmio, FM10K_BIST_CTRL_MODE);
@@ -138,11 +139,12 @@ init_scheduler(fm10k_t *fm10k)
     }
 
     /* Initialization of scheduler polling schedule */
-    /* Logical ports 0..35: Ethernet */
-    for ( i = 0; i < 2; i++ ) {
-        /* Set Quad to 1 */
-        /* PhysPort | Port | Quad */
-        m32 = (i * 4) | (i << 8) | (1 << 14);
+    /* Physical ports 0..35: Ethernet; Set Quad to 1 for 100 GbE */
+    for ( i = 0; i < 4; i++ ) {
+        m32 = 0 | ((i * 2) << 8) | (1 << 14); /* PhysPort | Port | Quad */
+        wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i), m32);
+        wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i), m32);
+        m32 = 4 | ((i * 2 + 1) << 8) | (1 << 14); /* PhysPort | Port | Quad */
         wr32(fm10k->mmio, FM10K_SCHED_RX_SCHEDULE(i), m32);
         wr32(fm10k->mmio, FM10K_SCHED_TX_SCHEDULE(i), m32);
     }
@@ -231,6 +233,7 @@ main(int argc, const char *const argv[])
     void *ptr;
     size_t size;
     fm10k_t fm10k;
+    int i;
 
     prog = argv[0];
     if ( argc < 2 ) {
@@ -258,6 +261,11 @@ main(int argc, const char *const argv[])
     /* Testing */
     printf("%x %x\n", *((uint32_t *)(ptr + 0x10)),
            rd32(fm10k.mmio, FM10K_SOFT_RESET));
+    for ( i = 0; i < 9; i++ ) {
+        printf("LED[%d] %05x, ", i, rd32(fm10k.mmio, FM10K_EPL_LED_STATUS(i)));
+        printf("CFG_A[%d] %05x, ", i, rd32(fm10k.mmio, FM10K_EPL_CFG_A(i)));
+        printf("CFG_B[%d] %05x\n", i, rd32(fm10k.mmio, FM10K_EPL_CFG_B(i)));
+    }
 
     /* Unmap and close */
     (void)munmap(ptr, size);
