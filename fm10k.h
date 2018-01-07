@@ -511,8 +511,12 @@
  * 24    Enable
  * 31:25 Reserved
  */
-#define FM10K_LED_CFG       FM10K_MGMT(0xc2b)
+#define FM10K_LED_CFG           FM10K_MGMT(0xc2b)
 
+/*
+ * EPL_LED_STATUS[0..8]
+ */
+#define EPL_LED_STATUS(i)       FM10K_EPL(0x400 * (i) + 0x306)
 
 #ifdef __cplusplus
 extern "C" {
