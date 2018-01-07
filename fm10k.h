@@ -354,6 +354,22 @@
 #define FM10K_EPL_CFG_A(i)      FM10K_EPL(0x400 * (i) + 0x304)
 
 /*
+ * EPL_CFG_B[0..8]
+ * 3:0   Port0PcsSel
+ * 7:4   Port1PcsSel
+ * 11:8  Port2PcsSel
+ * 15:12 Port3PcsSel
+ * 18:16 QplMode
+ * 31:19 Reserved
+ */
+#define FM10K_EPL_CFG_A(i)      FM10K_EPL(0x400 * (i) + 0x304)
+
+/*
+ * EPL_LED_STATUS[0..8]
+ */
+#define EPL_LED_STATUS(i)       FM10K_EPL(0x400 * (i) + 0x306)
+
+/*
  * TE_CFG[0..1]
  * Atomicity: 64
  * 7:0   OuterTTL
@@ -512,11 +528,6 @@
  * 31:25 Reserved
  */
 #define FM10K_LED_CFG           FM10K_MGMT(0xc2b)
-
-/*
- * EPL_LED_STATUS[0..8]
- */
-#define EPL_LED_STATUS(i)       FM10K_EPL(0x400 * (i) + 0x306)
 
 #ifdef __cplusplus
 extern "C" {
