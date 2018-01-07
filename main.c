@@ -222,6 +222,8 @@ init_switch_manager(fm10k_t *fm10k)
     m32 = rd32(fm10k->mmio, FM10K_SOFT_RESET);
     m32 |= (1UL << 3);
     wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
+
+    return 0;
 }
 
 
