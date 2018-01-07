@@ -367,7 +367,7 @@
 /*
  * EPL_LED_STATUS[0..8]
  */
-#define EPL_LED_STATUS(i)       FM10K_EPL(0x400 * (i) + 0x306)
+#define FM10K_EPL_LED_STATUS(i) FM10K_EPL(0x400 * (i) + 0x306)
 
 /*
  * TE_CFG[0..1]
