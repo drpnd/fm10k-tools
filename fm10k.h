@@ -344,6 +344,43 @@
 #define FM10K_PCIE_CTRL_EXT     FM10K_PCIE_PF(0x1)
 
 /*
+ * PCIE_PORTLOGIC
+ */
+#define FM10K_PCIE_PORTLOGIC    FM10K_PCIE_CFG(0x1c0)
+
+/*
+ * PCIE_PORTLOGIC_LINK_STATE
+ * 5:0   xmlh_ltssm_state
+ * 7:6   mac_phy_txdatak
+ * 23:8  mac_phy_txdata
+ * 24    rmlh_rcvd_idle1
+ * 25    rmlh_rcvd_idle0
+ * 26    rmlh_ts_link_num_is_k237
+ * 27    rmlh_ts_lane_num_is_k237
+ * 31:28 rmlh_ts_link_ctrl
+ * 32    rmlh_rcvd_lane_rev
+ * 33    rmlh_ts2_rcvd
+ * 34    rmlh_ts1_rcvd
+ * 35    rmlh_inskip_rcv
+ * 36    xmlh_link_up
+ * 37    xmtbyte_skip_sent
+ * 39:38 Reserved
+ * 47:40 rmlh_ts_link_num
+ * 50:48 Reserved
+ * 51    app_init_rst
+ * 52    mac_phy_txcompliance
+ * 53    mac_phy_txelecidle
+ * 54    mac_phy_txdetectrx_loopback
+ * 58:55 Reserved
+ * 59    xmlh_training_rst_n
+ * 60    xmlh_rcvr_revrs_pol_en
+ * 61    xmlh_link_in_training
+ * 62    xmlh_link_disable
+ * 63    xmlh_scrambler_disable
+ */
+#define FM10K_PCIE_PORTLOGIC_LINK_STATE FM10K_PCIE_CFG(0x1ca)
+
+/*
  * EPL_CFG_A[0..8]
  * 0     SpeedUp
  * 6:1   TimeOut
