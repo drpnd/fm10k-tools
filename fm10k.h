@@ -362,7 +362,7 @@
  * 18:16 QplMode
  * 31:19 Reserved
  */
-#define FM10K_EPL_CFG_A(i)      FM10K_EPL(0x400 * (i) + 0x304)
+#define FM10K_EPL_CFG_B(i)      FM10K_EPL(0x400 * (i) + 0x305)
 
 /*
  * EPL_LED_STATUS[0..8]
