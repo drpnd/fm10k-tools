@@ -576,6 +576,11 @@
 #define FM10K_AN_37_CFG(j, i)   FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x30)
 
 /*
+ * AN_73_CFG[0..8][0..3]
+ */
+#define FM10K_AN_73_CFG(j, i)   FM10K_EPL(0x400 * (j) + 0x80 * (i) + 0x33)
+
+/*
  * AN_37_TIMER_CFG[0..8][0..3]
  */
 #define FM10K_AN_37_TIMER_CFG(j, i)             \
