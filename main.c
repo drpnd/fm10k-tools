@@ -223,6 +223,16 @@ init_switch_manager(fm10k_t *fm10k)
     m32 |= (1UL << 3);
     wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
 
+    /* Enable auto-negotiation */
+    wr32(fm10k->mmio, FM10K_AN_73_CFG(1, 0), 1);
+    wr32(fm10k->mmio, FM10K_AN_73_CFG(6, 0), 1);
+
+    /* Enable LTSSM */
+    m32 = rd32(fm10k->mmio, FM10K_PCIE_CTRL);
+    m32 |= 1;
+    wr32(fm10k->mmio, FM10K_PCIE_CTRL, m32);
+
+
     return 0;
 }
 
@@ -277,18 +287,28 @@ main(int argc, const char *const argv[])
     }
     printf("PCIE_PORTLOGIC: %x\n", rd32(fm10k.mmio, FM10K_PCIE_PORTLOGIC));
     printf("DEVICE_CFG: %x\n", rd32(fm10k.mmio, FM10K_DEVICE_CFG));
+    printf("AN_37_CFG: %x\n", rd32(fm10k.mmio, FM10K_AN_37_CFG(1, 0)));
+    printf("AN_73_CFG: %x\n", rd32(fm10k.mmio, FM10K_AN_73_CFG(1, 0)));
+    printf("PCIE_IP: %x\n", rd32(fm10k.mmio, FM10K_PCIE_IP));
+    printf("PCIE_IM: %x\n", rd32(fm10k.mmio, FM10K_PCIE_IM));
+    printf("GLOBAL_INTERRUPT_DETECT: %x\n",
+           rd32(fm10k.mmio, FM10K_GLOBAL_INTERRUPT_DETECT));
+    printf("CORE_INTERRUPT_DETECT: %x\n",
+           rd32(fm10k.mmio, FM10K_CORE_INTERRUPT_DETECT));
+    printf("CORE_INTERRUPT_MASK: %x\n",
+           rd32(fm10k.mmio, FM10K_CORE_INTERRUPT_MASK));
 
-#if 0
+#if 1
+    unsigned int irq_on;
     unsigned int data;
     ssize_t nr;
     while ( 1 ) {
         /* Enable IRQ */
-        unsigned int irq_on = 1;
+        irq_on = 1;
         write(fd, &irq_on, sizeof(irq_on));
+        /* Read interrupt */
         nr = read(fd, &data, sizeof(data));
-        if ( nr >= 0 ) {
-            printf("RD: %lu %u\n", nr, data);
-        }
+        printf("RD: %lu %u\n", nr, data);
     }
 #endif
 

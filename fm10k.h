@@ -346,17 +346,17 @@
 /*
  * PCIE_IP
  */
-#define FM10K_PCIE_IP           FM10K_PCIE_IM(0x13000)
+#define FM10K_PCIE_IP           FM10K_PCIE_PF(0x13000)
 
 /*
  * PCIE_IM
  */
-#define FM10K_PCIE_IM           FM10K_PCIE_IM(0x13001)
+#define FM10K_PCIE_IM           FM10K_PCIE_PF(0x13001)
 
 /*
  * PCIE_IB
  */
-#define FM10K_PCIE_IB           FM10K_PCIE_IM(0x13002)
+#define FM10K_PCIE_IB           FM10K_PCIE_PF(0x13002)
 
 /*
  * PCIE_PORTLOGIC
@@ -781,6 +781,16 @@
  * 63:43 Reserved
  */
 #define FM10K_INTERRUPT_MASK_BSM    FM10K_MGMT(0x442)
+
+/*
+ * CORE_INTERRUPT_DETECT
+ */
+#define FM10K_CORE_INTERRUPT_DETECT FM10K_MGMT(0x444)
+
+/*
+ * CORE_INTERRUPT_MASK
+ */
+#define FM10K_CORE_INTERRUPT_MASK   FM10K_MGMT(0x445)
 
 /*
  * LED_CFG
