@@ -160,6 +160,28 @@
 #define FM10K_SCHED_FREELIST_INIT       FM10K_SCHED(0x30244)
 
 /*
+ * PLL_EPL_CTRL
+ * 0     Nreset
+ * 1     Enable
+ * 2     Halt
+ * 8:3   RefDiv
+ * 9     FbDiv4
+ * 17:10 FbDiv255
+ * 23:18 OutDiv
+ * 26:24 OutMuxSel
+ * 31:27 Reserved
+ */
+#define FM10K_PLL_EPL_CTRL   FM10K_PORTS_MGMT(0x0)
+
+/*
+ * PLL_EPL_STAT
+ * 0     PllLocked
+ * 1     PllFreqChange
+ * 9:2   MiscCtrl
+ */
+#define FM10K_PLL_EPL_STAT   FM10K_PORTS_MGMT(0x1)
+
+/*
  * PLL_FABRIC_CTRL
  * 0     Nreset
  * 1     Enable
@@ -201,6 +223,21 @@
  * 31:5 Reserved
  */
 #define FM10K_SBUS_EPL_CFG      FM10K_PORTS_MGMT(0x5)
+
+/*
+ * BSM_SCRATCH[0..1023]
+ */
+#define FM10K_BSM_SCRATCH(i)    FM10K_MGMT((i) + 0x800)
+
+/*
+ * BSM_CTRL
+ */
+#define FM10K_BSM_CTRL          FM10K_MGMT(0xc00)
+
+/*
+ * BSM_ARGS
+ */
+#define FM10K_BSM_ARGS          FM10K_MGMT(0xc01)
 
 /*
  * PLL_PCIE_CTRL

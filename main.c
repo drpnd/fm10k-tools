@@ -31,7 +31,16 @@
 #include <time.h>
 
 /* 64 MiB */
-#define FM10K_BAR4_SIZE 0x4000000
+#define FM10K_BAR4_SIZE         0x4000000
+
+/* FM10K NVM recovery version */
+#define NVM_PCIE_RECOVERY_VER   0x122
+
+enum {
+    FM10K_SOFT_RESET_LOCK_FREE = 0,
+    FM10K_SOFT_RESET_LOCK_NVM = 1,
+    FM10K_SOFT_RESET_LOCK_API = 2,
+};
 
 /*
  * FM10K management structure
@@ -171,6 +180,209 @@ init_scheduler(fm10k_t *fm10k)
 }
 
 /*
+ * Wait for SOFT_RESET lock owner
+ */
+int
+wait_for_soft_reset_lock_owner(fm10k_t *fm10k, int owner, long timeout)
+{
+    uint32_t m32;
+    int lockowner;
+    struct timespec ts;
+    long atime;
+    int cnt;
+
+    /* Get the lock owner */
+    m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(2));
+    lockowner = m32 & 0x3;
+
+    if ( FM10K_SOFT_RESET_LOCK_API == lockowner ) {
+        if ( FM10K_SOFT_RESET_LOCK_API != owner ) {
+            fprintf(stderr, "warning...\n");
+            return -1;
+        }
+    }
+
+    atime = 0;
+    cnt = 1;
+    while ( lockowner != owner ) {
+        printf("%x:%x\n", owner, lockowner);
+        if ( atime >= timeout ) {
+            return -1;
+        }
+        /* Check timeout */
+        ts.tv_sec  = 0;
+        ts.tv_nsec = 10000L * cnt;
+        nanosleep(&ts, NULL);
+        atime += 10000L * cnt;
+        cnt++;
+
+        m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(2));
+        lockowner = m32 & 0x3;
+    }
+
+    return 0;
+}
+
+/*
+ * Take SOFT_RESET lock
+ */
+int
+take_soft_reset_lock(fm10k_t *fm10k)
+{
+    uint32_t m32;
+    int i;
+    int ret;
+    struct timespec ts;
+
+    /* Get NVM version */
+    m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(401));
+    if ( m32 > NVM_PCIE_RECOVERY_VER ) {
+        /* Support locking in NVM */
+        for ( i = 0; i < 3; i++ ) {
+            ret = wait_for_soft_reset_lock_owner(fm10k,
+                                                 FM10K_SOFT_RESET_LOCK_FREE,
+                                                 1000 * 1000 * 2000);
+            if ( ret < 0 ) {
+                /* Error */
+                return -1;
+            }
+            /* Take a lock */
+            wr32(fm10k->mmio, FM10K_BSM_SCRATCH(2), FM10K_SOFT_RESET_LOCK_API);
+
+            /* Wait 50us */
+            ts.tv_sec  = 0;
+            ts.tv_nsec = 50000L;
+            nanosleep(&ts, NULL);
+
+            /* Check the owner */
+            ret = wait_for_soft_reset_lock_owner(fm10k,
+                                                 FM10K_SOFT_RESET_LOCK_API, 0);
+            if ( 0 == ret ) {
+                return 0;
+            }
+        }
+    } else {
+        /* No support locking in NVM */
+        return -1;
+    }
+
+    return -1;
+}
+
+/*
+ * Drop SOFT_RESET lock
+ */
+int
+drop_soft_reset_lock(fm10k_t *fm10k)
+{
+    uint32_t m32;
+    int i;
+    int ret;
+
+    /* Get NVM version */
+    m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(401));
+    printf("BSM_SCRATCH: %x\n", m32);
+    if ( m32 > NVM_PCIE_RECOVERY_VER ) {
+        /* Support locking in NVM */
+        m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(2));
+        switch ( m32 & 3 ) {
+        case FM10K_SOFT_RESET_LOCK_API:
+            wr32(fm10k->mmio, FM10K_BSM_SCRATCH(2), 0);
+            return 0;
+            break;
+        case FM10K_SOFT_RESET_LOCK_FREE:
+            fprintf(stderr, "warning\n");
+            return 0;
+        default:
+            return -1;
+        }
+    } else {
+        /* No support locking in NVM */
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Reset switch
+ */
+int
+reset_switch(fm10k_t *fm10k)
+{
+    uint32_t m32;
+    int ret;
+    struct timespec ts;
+
+    /* Try to take a lock */
+    ret = take_soft_reset_lock(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Could not take lock\n");
+        return -1;
+    }
+
+    /* Set SwitchReady=0 */
+    m32 = rd32(fm10k->mmio, FM10K_SOFT_RESET);
+    m32 &= ~(1 << 3);
+    wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
+
+    /* Wait 100us */
+    ts.tv_sec  = 0;
+    ts.tv_nsec = 100000L;
+    nanosleep(&ts, NULL);
+
+    /* Reduce EPL frequency to reduce power during reset */
+    m32 = rd32(fm10k->mmio, FM10K_PLL_EPL_CTRL);
+    m32 |= (63 << 18);          /* OutDiv = 63 */
+    wr32(fm10k->mmio, FM10K_PLL_EPL_CTRL, m32);
+
+    /* Apply OutDiv (Bit[4]) */
+    m32 = rd32(fm10k->mmio, FM10K_PLL_EPL_STAT);
+    m32 |= (1 << 6);
+    wr32(fm10k->mmio, FM10K_PLL_EPL_STAT, m32);
+    m32 &= ~(1 << 6);
+    wr32(fm10k->mmio, FM10K_PLL_EPL_STAT, m32);
+
+    /* Assert Switch/EPL reset */
+    m32 = rd32(fm10k->mmio, FM10K_SOFT_RESET);
+    m32 |= (1 << 2);            /* SwitchReset */
+    m32 |= (1 << 1);            /* EPLReset */
+    wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
+
+    /* Wait 1ms */
+    ts.tv_sec  = 0;
+    ts.tv_nsec = 1000000L;
+    nanosleep(&ts, NULL);
+
+    ret = drop_soft_reset_lock(fm10k);
+    if ( ret < 0 ) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Boot switch
+ */
+int
+boot_switch(fm10k_t *fm10k)
+{
+    int ret;
+
+    /* Reset the switch */
+    ret = reset_switch(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Failed to reset the switch\n");
+        return -1;
+    }
+
+    /* Set up FABRIC_PLL */
+
+    return 0;
+}
+
+/*
  * Initialize switch manager control
  */
 int
@@ -207,6 +419,9 @@ init_switch_manager(fm10k_t *fm10k)
     }
 
     /* Initialize the switch functions */
+    //m32 = rd32(fm10k->mmio, FM10K_CM_GLOBAL_CFG);
+    //m32 |= (0x1 << 10) | (0x1 << 11) | (0x1 << 12) | (0x4 << 13);
+    //wr32(fm10k->mmio, FM10K_CM_GLOBAL_CFG, m32);
 
     /* Initialize scheduler */
     init_scheduler(fm10k);
@@ -272,6 +487,9 @@ main(int argc, const char *const argv[])
     fm10k.fd = fd;
     fm10k.mmio = ptr;
 
+    /* Boot switch */
+    boot_switch(&fm10k);
+
     /* Initialize scheduler */
     printf("Initializing switch manager control\n");
     //init_switch_manager(&fm10k);
@@ -297,18 +515,19 @@ main(int argc, const char *const argv[])
            rd32(fm10k.mmio, FM10K_CORE_INTERRUPT_DETECT));
     printf("CORE_INTERRUPT_MASK: %x\n",
            rd32(fm10k.mmio, FM10K_CORE_INTERRUPT_MASK));
+    printf("CM_GLOBAL_CFG: %x\n", rd32(fm10k.mmio, FM10K_CM_GLOBAL_CFG));
+    printf("LED_CFG: %x\n", rd32(fm10k.mmio, FM10K_LED_CFG));
 
 #if 1
-    unsigned int irq_on;
-    unsigned int data;
+    uint32_t info;
     ssize_t nr;
     while ( 1 ) {
         /* Enable IRQ */
-        irq_on = 1;
-        write(fd, &irq_on, sizeof(irq_on));
+        info = 1;
+        write(fd, &info, sizeof(info));
         /* Read interrupt */
-        nr = read(fd, &data, sizeof(data));
-        printf("RD: %lu %u\n", nr, data);
+        nr = read(fd, &info, sizeof(info));
+        printf("RD: %lu %u\n", nr, info);
     }
 #endif
 
