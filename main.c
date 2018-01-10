@@ -569,6 +569,26 @@ serdes_init_op_mode(fm10k_t *fm10k)
 }
 
 /*
+ * Initialize SBUS
+ */
+int
+sbus_init(fm10k_t *fm10k)
+{
+    /* FIXME */
+    return 0;
+}
+
+/*
+ * Initialize switch SerDes
+ */
+int
+init_switch_serdes(fm10k_t *fm10k)
+{
+    /* FIXME */
+    return 0;
+}
+
+/*
  * Boot switch
  */
 int
@@ -597,6 +617,25 @@ boot_switch(fm10k_t *fm10k)
         return -1;
     }
 
+    ret = serdes_init_op_mode(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Failed to serdes\n");
+        return -1;
+    }
+
+    ret = sbus_init(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Failed to sbus\n");
+        return -1;
+    }
+
+    ret = init_switch_serdes(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Failed to switch serdes\n");
+        return -1;
+    }
+
+    /* Disable scan */
 
     return 0;
 }
