@@ -56,22 +56,6 @@
 
 
 /*
- * FM10K_BIST_CTRL
- * 0..8: PCIE[0..8]
- * 9:    EPL
- * 10:   FABRIC
- * 11:   Tunnel
- * 12:   BSM
- * 13:   CRM
- * 14:   FIBM
- * 15:   SBM
- * (16..32: Reserved)
- */
-#define FM10K_BIST_CTRL         FM10K_MGMT(0xc10)
-#define FM10K_BIST_CTRL_RUN     FM10K_MGMT(0xc10)
-#define FM10K_BIST_CTRL_MODE    FM10K_MGMT(0xc10 + 1)
-
-/*
  * SCHED_RX_SCHEDULE[0..1023]
  * 7:0   PhysPort
  * 13:8  Port
@@ -238,6 +222,32 @@
  * BSM_ARGS
  */
 #define FM10K_BSM_ARGS          FM10K_MGMT(0xc01)
+
+/*
+ * FUSE_DATA_0
+ */
+#define FM10K_FUSE_DATA_0       FM10K_MGMT(0xc0e)
+
+/*
+ * FUSE_DATA_1
+ */
+#define FM10K_FUSE_DATA_1       FM10K_MGMT(0xc0f)
+
+/*
+ * FM10K_BIST_CTRL
+ * 0..8: PCIE[0..8]
+ * 9:    EPL
+ * 10:   FABRIC
+ * 11:   Tunnel
+ * 12:   BSM
+ * 13:   CRM
+ * 14:   FIBM
+ * 15:   SBM
+ * (16..32: Reserved)
+ */
+#define FM10K_BIST_CTRL         FM10K_MGMT(0xc10)
+#define FM10K_BIST_CTRL_RUN     FM10K_MGMT(0xc10)
+#define FM10K_BIST_CTRL_MODE    FM10K_MGMT(0xc10 + 1)
 
 /*
  * PLL_PCIE_CTRL

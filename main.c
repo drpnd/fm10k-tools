@@ -281,7 +281,6 @@ drop_soft_reset_lock(fm10k_t *fm10k)
 
     /* Get NVM version */
     m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(401));
-    printf("BSM_SCRATCH: %x\n", m32);
     if ( m32 > NVM_PCIE_RECOVERY_VER ) {
         /* Support locking in NVM */
         m32 = rd32(fm10k->mmio, FM10K_BSM_SCRATCH(2));
@@ -299,6 +298,142 @@ drop_soft_reset_lock(fm10k_t *fm10k)
     } else {
         /* No support locking in NVM */
         return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Set frame handler clock (use default value)
+ */
+int
+set_frame_handler_clock(fm10k_t *fm10k)
+{
+    uint32_t m32;
+    int sku;
+    int feature;
+    int freq;
+    int refdiv;
+    int outdiv;
+    int fbdiv4;
+    int fbdiv255;
+    int skuclock;
+    struct timespec ts;
+    int maxfreq;
+    int fhclock;
+    int freqsel;
+
+    /* Read SKU from FUSE_DATA_0[15:11] */
+    m32 = rd32(fm10k->mmio, FM10K_FUSE_DATA_0);
+    if ( 0 == m32 ) {
+        /* Unknown SKU */
+        fprintf(stderr, "Unknown SKU\n");
+        sku = 0xff;
+    } else {
+        sku = (m32 >> 11) & 0x1f;
+    }
+
+    /* Get feature code and frequency selection */
+    m32 = rd32(fm10k->mmio, FM10K_PLL_FABRIC_LOCK);
+    /* FeatureCode:
+       0000b = Full -- All frequencies are supported
+       0001b = LIMITED0 -- Restricted to 600, 500, 400, 300 MHz
+       0010b = LIMITED1 -- Restricted to 500, 400, 300 MHz
+       0011b = LIMITED2 -- Restricted to 400, 300 MHz
+       0100b = LIMITED3 -- Restricted to 300 MHz */
+    feature = m32 & 0xf;
+    /* FreqSel:
+       0000b = USE_CTRL -- Use PLL_FABRIC_CTRL's values to set frequency
+       0001b = F600 -- 600 MHz
+       0010b = F500 -- 500 MHz
+       0011b = F400 -- 400 MHz
+       0100b = F300 -- 300 MHz */
+    freq = (m32 >> 4) & 0xf;
+
+    switch ( sku ) {
+    case 0: /* FM10840 */
+        refdiv = 0x19;
+        outdiv = 0x5;
+        fbdiv4 = 0x1;
+        fbdiv255 = 0xc4;
+        skuclock = 980000000;   /* 980 MHz in binary */
+        break;
+    case 1: /* FM10420 */
+    default:
+        refdiv = 0x3;
+        outdiv = 0x7;
+        fbdiv4 = 0x0;
+        fbdiv255 = 0x2f;
+        skuclock = 699404761;   /* 700 MHz in binary */
+        break;
+    }
+
+    if ( 0 == feature ) {
+        /* Full control over PLL */
+        m32 = rd32(fm10k->mmio, FM10K_PLL_FABRIC_CTRL);
+        /* RefDiv | FbDiv4 | FbDiv255 | OutDiv */
+        m32 = (m32 & ~(0xfffff8UL)) |
+            (refdiv << 3) | (fbdiv4 << 4) | (fbdiv255 << 10) | (outdiv << 18);
+        wr32(fm10k->mmio, FM10K_PLL_FABRIC_CTRL, m32);
+
+        /* Toggle reset */
+        m32 &= ~1UL;
+        wr32(fm10k->mmio, FM10K_PLL_FABRIC_CTRL, m32);
+
+        /* Wait 500ns */
+        ts.tv_sec  = 0;
+        ts.tv_nsec = 500L;
+        nanosleep(&ts, NULL);
+
+        m32 |= 1UL;
+        wr32(fm10k->mmio, FM10K_PLL_FABRIC_CTRL, m32);
+
+        /* Wait 1ms */
+        ts.tv_sec  = 0;
+        ts.tv_nsec = 1000000L;
+        nanosleep(&ts, NULL);
+
+        m32 = rd32(fm10k->mmio, FM10K_PLL_FABRIC_LOCK);
+        m32 = (m32 & ~0xfUL) | (0);
+        wr32(fm10k->mmio, FM10K_PLL_FABRIC_LOCK, m32);
+    } else {
+        switch ( feature ) {
+        case 1:                 /* LIMITED0 */
+            maxfreq = 612 * 1000000;
+            break;
+        case 2:                 /* LIMITED1 */
+            maxfreq = 510 * 1000000;
+            break;
+        case 3:                 /* LIMITED2 */
+            maxfreq = 408 * 1000000;
+            break;
+        case 4:                 /* LIMITED3 */
+            maxfreq = 306 * 1000000;
+            break;
+        default:
+            maxfreq = 612 * 1000000;
+        }
+        if ( maxfreq > skuclock ) {
+            maxfreq = skuclock;
+        }
+
+        if ( fhclock >= 612 * 1000000 ) {
+            /* F600 */
+            freqsel = 1;
+        } else if ( fhclock >= 510 * 1000000 ) {
+            /* F500 */
+            freqsel = 2;
+        } else if ( fhclock >= 408 * 1000000 ) {
+            /* F400 */
+            freqsel = 3;
+        } else {
+            /* F300 */
+            freqsel = 4;
+        }
+
+        m32 = rd32(fm10k->mmio, FM10K_PLL_FABRIC_LOCK);
+        m32 = (m32 & ~0xf0UL) | (freqsel << 4);
+        wr32(fm10k->mmio, FM10K_PLL_FABRIC_LOCK, m32);
     }
 
     return 0;
@@ -363,6 +498,77 @@ reset_switch(fm10k_t *fm10k)
 }
 
 /*
+ * Release switch
+ */
+int
+release_switch(fm10k_t *fm10k)
+{
+    uint32_t m32;
+    uint64_t m64;
+    struct timespec ts;
+    int ret;
+
+    /* Clear switch/tunnel/EPL memories */
+    m64 = rd64(fm10k->mmio, FM10K_BIST_CTRL);
+    m64 |= (1 << 10) | (1 << 11) | (1 << 9);
+    wr64(fm10k->mmio, FM10K_BIST_CTRL, m64);
+
+    /* Wait 0.8ms */
+    ts.tv_sec  = 0;
+    ts.tv_nsec = 800000L;
+    nanosleep(&ts, NULL);
+
+    m64 &= ~((1 << 10) | (1 << 11) | (1 << 9) | (1ULL << 42) | (1ULL << 43)
+             | (1ULL << 41));
+    wr64(fm10k->mmio, FM10K_BIST_CTRL, m64);
+
+    /* Try to take a lock */
+    ret = take_soft_reset_lock(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Could not take lock\n");
+        return -1;
+    }
+
+    m32 = rd32(fm10k->mmio, FM10K_SOFT_RESET);
+    m32 &= ~((1 << 2) | (1 << 1));
+    wr32(fm10k->mmio, FM10K_SOFT_RESET, m32);
+
+    /* Wait 100ns */
+    ts.tv_sec  = 0;
+    ts.tv_nsec = 100000L;
+    nanosleep(&ts, NULL);
+
+    ret = drop_soft_reset_lock(fm10k);
+    if ( ret < 0 ) {
+        return -1;
+    }
+
+    m32 = rd32(fm10k->mmio, FM10K_PLL_EPL_CTRL);
+    m32 = (m32 & ~(0x3f << 18)) | (6 << 18);
+    wr32(fm10k->mmio, FM10K_PLL_EPL_CTRL, m32);
+
+    /* Apply OutDiv (toggle PLL_EPL_STAT.MiscCtrl[4]) */
+    m32 = rd32(fm10k->mmio, FM10K_PLL_EPL_STAT);
+    m32 |= (1 << 6);
+    wr32(fm10k->mmio, FM10K_PLL_EPL_STAT, m32);
+
+    m32 &= ~(1 << 6);
+    wr32(fm10k->mmio, FM10K_PLL_EPL_STAT, m32);
+
+    return 0;
+}
+
+/*
+ * Initialize SerDes
+ */
+int
+serdes_init_op_mode(fm10k_t *fm10k)
+{
+    /* FIXME */
+    return 0;
+}
+
+/*
  * Boot switch
  */
 int
@@ -377,7 +583,20 @@ boot_switch(fm10k_t *fm10k)
         return -1;
     }
 
-    /* Set up FABRIC_PLL */
+    /* Configure clock via FABRIC_PLL */
+    ret = set_frame_handler_clock(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Failed to set frame handler clock\n");
+        return -1;
+    }
+
+    /* Release switch */
+    ret = release_switch(fm10k);
+    if ( ret < 0 ) {
+        fprintf(stderr, "Failed to release switch\n");
+        return -1;
+    }
+
 
     return 0;
 }
