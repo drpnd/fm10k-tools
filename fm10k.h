@@ -356,6 +356,11 @@
 #define FM10K_SCAN_DATA_IN      FM10K_MGMT(0xc2d)
 
 /*
+ * PCIE_HOST_LANE_CTRL
+ */
+#define FM10K_PCIE_HOST_LANE_CTRL   FM10K_PCIE_PF(0x19001)
+
+/*
  * PCIE_SERDES_CTRL[0..7]
  * 0     Reserved
  * 1     Interrupt
@@ -391,6 +396,46 @@
 #define FM10K_PCIE_CTRL_EXT     FM10K_PCIE_PF(0x1)
 
 /*
+ * PCIE_FACTPS
+ * 1:0  Func0PowerState; 00b DR, 01b D0u, 10b D0a, 11b D3
+ * 2    Reserved
+ * 3    Func0Aux_En
+ * 31:4 Reserved
+ */
+#define FM10K_PCIE_FACTPS       FM10K_PCIE_PF(0x4)
+
+/*
+ * PCIE_PBACL
+ */
+#define FM10K_PCIE_PBACL(i)     FM10K_PCIE_PF((i) + 0x10000)
+
+/*
+ * PCIE_INT_MAP
+ */
+#define FM10K_PCIE_INT_MAP(i)   FM10K_PCIE_PF((i) + 0x10080)
+
+/*
+ * PCIE_MSIX_VECTOR
+ */
+#define FM10K_PCIE_MSIX_VECTOR(i)               \
+    FM10K_PCIE_PF(0x4 * (i) + 0x11000)
+
+/*
+ * PCIE_INT_CTRL
+ */
+#define FM10K_PCIE_INT_CTRL(i)  FM10K_PCIE_PF(0x4 * (i) + 0x12000)
+
+/*
+ * PCIE_ITR
+ */
+#define FM10K_PCIE_ITR(i)       FM10K_PCIE_PF((i) + 0x12400)
+
+/*
+ * PCIE_ITR2
+ */
+#define FM10K_PCIE_ITR2(i)      FM10K_PCIE_PF(0x2 * (i) + 0x12800)
+
+/*
  * PCIE_IP
  */
 #define FM10K_PCIE_IP           FM10K_PCIE_PF(0x13000)
@@ -404,6 +449,16 @@
  * PCIE_IB
  */
 #define FM10K_PCIE_IB           FM10K_PCIE_PF(0x13002)
+
+/*
+ * PCIE_SRAM_IP
+ */
+#define FM10K_PCIE_SRAM_IP      FM10K_PCIE_PF(0x13003)
+
+/*
+ * PCIE_SRAM_IM
+ */
+#define FM10K_PCIE_SRAM_IM      FM10K_PCIE_PF(0x13004)
 
 /*
  * PCIE_PORTLOGIC
